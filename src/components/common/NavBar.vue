@@ -10,7 +10,7 @@
       />
     </div>
     <div class="nav-bar-account">
-      <a-button v-if="!login">登录</a-button>
+      <a-button v-if="!login" @click="handleSignInGithub">登录</a-button>
       <a-dropdown v-else>
         <a-menu slot="overlay" @click="handleMenuClick">
           <a-menu-item key="1"> <a-icon type="setting" />编辑 </a-menu-item>
@@ -26,6 +26,7 @@
 </template>
 
 <script>
+import { openWindow } from '@/common/Authorize'
 export default {
   name: "NavBar",
   props: {
@@ -39,9 +40,33 @@ export default {
     },
   },
   data() {
-    return {}
+    const baseUrl = 'https://github.com/login/oauth/authorize'
+    const client_id = 'client_id=4b78273612d5e89f0f0c'
+    const redirect_uri = 'redirect_uri=http://localhost:8000/github/callback'
+    const scope = 'scope=user'
+    const state = 'state=1'
+    const authorize = `${baseUrl}?${client_id}&${redirect_uri}&${scope}&${state}`
+    return {
+      authorize
+    }
   },
   methods: {
+    handleSignInGithub() {
+      console.log(this.$store);
+      this.$store.dispatch('signInGithub').then(_ => {
+        openWindow(this.authorize, 'Github', 540, 540)
+        window.addEventListener('message', this.handleSignInGithubResult, false)
+      })
+    },
+    handleSignInGithubResult(e) {
+      const { result } = e.data
+      if (result) {
+        this.$store.dispatch('signInGithubResult', result).then(res => {
+          console.log(res);
+          window.removeEventListener('message', this.handleSignInGithubResult, false)
+        })
+      }
+    },
     handleTitle() {
       if (this.$route.path === "/home") return
       this.$router.push("/")
