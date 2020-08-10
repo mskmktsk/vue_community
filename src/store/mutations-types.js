@@ -1,3 +1,4 @@
-const CHANGE_NAME = Symbol()
+const SIGN_IN = 'SIGN_IN'
+const SIGN_OUT = 'SIGN_OUT'
 
-export default { CHANGE_NAME }
+export { SIGN_IN, SIGN_OUT }

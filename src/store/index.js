@@ -6,7 +6,8 @@ import actions from './actions'
 Vue.use(Vuex)
 
 const state = {
-  name: ''
+  name: '',
+  isSignIn: false
 }
 
 const store = new Vuex.Store({

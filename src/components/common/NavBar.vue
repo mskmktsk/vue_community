@@ -10,11 +10,11 @@
       />
     </div>
     <div class="nav-bar-account">
-      <a-button v-if="!login" @click="handleSignInGithub">登录</a-button>
+      <a-button v-if="!signin" @click="handleSignInGithub">登录</a-button>
       <a-dropdown v-else>
         <a-menu slot="overlay" @click="handleMenuClick">
-          <a-menu-item key="1"> <a-icon type="setting" />编辑 </a-menu-item>
-          <a-menu-item key="2"> <a-icon type="logout" />注销 </a-menu-item>
+          <a-menu-item key="setting"> <a-icon type="setting" />编辑 </a-menu-item>
+          <a-menu-item key="signout"> <a-icon type="logout" />注销 </a-menu-item>
         </a-menu>
         <a-button>
           <a-icon type="user" />
@@ -27,18 +27,9 @@
 
 <script>
 import { openWindow } from '@/common/Authorize'
+import { SIGN_IN, SIGN_OUT} from '@/store/mutations-types'
 export default {
   name: "NavBar",
-  props: {
-    login: {
-      type: Boolean,
-      default: false
-    },
-    username: {
-      type: String,
-      default: "我"
-    },
-  },
   data() {
     const baseUrl = 'https://github.com/login/oauth/authorize'
     const client_id = 'client_id=4b78273612d5e89f0f0c'
@@ -50,19 +41,32 @@ export default {
       authorize
     }
   },
+  computed: {
+    username() {
+      const name = this.$store.state.name
+      return name ? name : '我'
+    },
+    signin() {
+      return this.$store.state.isSignIn
+    }
+  },
   methods: {
+    handleMenuClick(e) {
+      if (e.key === 'signout') this.handleSignOut()
+    },
+    handleSignOut() {
+      this.$store.commit(SIGN_OUT)
+    },
     handleSignInGithub() {
-      console.log(this.$store);
       this.$store.dispatch('signInGithub').then(_ => {
         openWindow(this.authorize, 'Github', 540, 540)
         window.addEventListener('message', this.handleSignInGithubResult, false)
       })
     },
     handleSignInGithubResult(e) {
-      const { result } = e.data
-      if (result) {
-        this.$store.dispatch('signInGithubResult', result).then(res => {
-          console.log(res);
+      const { code, data, message } = e.data
+      if (code === 200) {
+        this.$store.dispatch('signInGithubResult', data).then(res => {
           window.removeEventListener('message', this.handleSignInGithubResult, false)
         })
       }

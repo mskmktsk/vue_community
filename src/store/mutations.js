@@ -1,7 +1,12 @@
-import types from './mutations-types'
+import { SIGN_IN, SIGN_OUT } from './mutations-types'
 
 export default {
-  [types.CHANGE_NAME] (state, payload) {
+  [SIGN_IN](state, payload) {
     state.name = payload.name
+    state.isSignIn = true
+  },
+  [SIGN_OUT](state) {
+    state.name = ''
+    state.isSignIn = false
   }
 }
